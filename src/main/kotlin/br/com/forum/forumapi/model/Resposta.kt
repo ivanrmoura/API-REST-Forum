@@ -1,12 +1,26 @@
 package br.com.forum.forumapi.model
 
+import jakarta.persistence.Entity
+import jakarta.persistence.GeneratedValue
+import jakarta.persistence.GenerationType
+import jakarta.persistence.Id
+import jakarta.persistence.ManyToOne
 import java.time.LocalDateTime
 
+@Entity
 class Resposta (
-    val id: Long? = null,
-    val mensagem: String,
-    val autor: Usuario,
-    val topico: Topico,
-    val dataCriacao: LocalDateTime = LocalDateTime.now(),
-    val solucao: Boolean = false
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    var id: Long? = null,
+    var mensagem: String,
+
+    @ManyToOne
+    var autor: Usuario,
+
+    @ManyToOne
+    var topico: Topico,
+
+    var dataCriacao: LocalDateTime = LocalDateTime.now(),
+    var solucao: Boolean = false
 )

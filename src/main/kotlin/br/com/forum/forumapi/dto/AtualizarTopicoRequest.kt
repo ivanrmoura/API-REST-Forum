@@ -6,7 +6,7 @@ import org.jetbrains.annotations.NotNull
 
 class AtualizarTopicoRequest (
     @NotNull
-    val id: Long?,
+    val id: Long,
     @NotEmpty
     @Size(min = 5, max = 100)
     val titulo: String,

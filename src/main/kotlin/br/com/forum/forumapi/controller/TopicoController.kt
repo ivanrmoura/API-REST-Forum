@@ -3,6 +3,7 @@ package br.com.forum.forumapi.controller
 import br.com.forum.forumapi.dto.AtualizarTopicoRequest
 import br.com.forum.forumapi.dto.CriarTopicoRequest
 import br.com.forum.forumapi.dto.TopicoResponse
+import br.com.forum.forumapi.dto.toResponse
 import br.com.forum.forumapi.model.Topico
 import br.com.forum.forumapi.service.TopicoService
 import jakarta.validation.Valid
@@ -36,7 +37,7 @@ class TopicoController(
     fun buscarPorId(
         @PathVariable id: Long
     ): TopicoResponse{
-        return topicoService.buscarPorId(id)
+        return topicoService.buscarTopicoResponsePorId(id)
     }
 
     @PostMapping

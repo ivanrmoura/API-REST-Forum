@@ -7,49 +7,34 @@ import br.com.forum.forumapi.dto.toResponse
 import br.com.forum.forumapi.dto.toTopico
 import br.com.forum.forumapi.exception.NotFoundException
 import br.com.forum.forumapi.model.Topico
+import br.com.forum.forumapi.repositories.TopicoRepository
+import jakarta.transaction.Transactional
 import org.springframework.stereotype.Service
 
 @Service
 class TopicoService(
     private val cursoService: CursoService,
-    private val usuarioService: UsuarioService
+    private val usuarioService: UsuarioService,
+    private val topicoRepository: TopicoRepository
 ) {
 
-    private var topicos = mutableListOf<Topico>()
-
-    init {
-        val topico1 = Topico(
-            id = 1,
-            autor = usuarioService.buscarPorId(1),
-            curso = cursoService.buscarPorId(1),
-            mensagem = "Como criar um botão com compose",
-            titulo = "Criação de botão"
-        )
-
-        val topico2 = Topico(
-            id = 2,
-            autor = usuarioService.buscarPorId(2),
-            curso = cursoService.buscarPorId(2),
-            mensagem = "Como criar uma variável",
-            titulo = "Variavél em Kotlin"
-        )
-        topicos.add(topico1)
-        topicos.add(topico2)
-    }
-
     fun listar(): List<TopicoResponse>{
-        return topicos.map { it.toResponse() }
+        val topicos = topicoRepository.findAll()
+        return topicos.map{ it.toResponse() }
     }
 
-     fun buscarPorId(id: Long): TopicoResponse{
-         val topico = topicos.find{  it.id == id }
-             ?: throw NotFoundException("Topico de id $id não existe!")
+     fun buscarTopicoPorId(id: Long): Topico{
+         val topico = topicoRepository.findById(id)
+             .orElseThrow{ NotFoundException("Topico de id $id não encontrado") }
+         return topico
+    }
 
-
-         return topico.toResponse()
+    fun buscarTopicoResponsePorId(id: Long): TopicoResponse{
+        return buscarTopicoPorId(id).toResponse()
     }
 
 
+    @Transactional
     fun criarTopico(topicoDto: CriarTopicoRequest): TopicoResponse{
         val curso = cursoService.buscarPorId(topicoDto.curso)
         val autor = usuarioService.buscarPorId(topicoDto.autor)
@@ -59,41 +44,35 @@ class TopicoService(
             autor = autor
         )
 
-        topico.id = (topicos.size+1).toLong()
-        topicos.add(topico)
+        topicoRepository.save(topico)
 
         return topico.toResponse()
     }
 
+    @Transactional
     fun atualizarTopico(
         atualizarTopicoRequest: AtualizarTopicoRequest
     ): TopicoResponse{
 
-        val index = topicos.indexOfFirst{it.id == atualizarTopicoRequest.id}
+        val topico = buscarTopicoPorId(atualizarTopicoRequest.id)
 
-        if(index == -1){
-            throw NotFoundException("Topico de id ${atualizarTopicoRequest.id} não existe!")
+        topico.apply {
+            titulo = atualizarTopicoRequest.titulo
+            mensagem = atualizarTopicoRequest.mensagem
         }
 
-        val topicoAtualizado = topicos[index].copy(
-            titulo = atualizarTopicoRequest.titulo,
-            mensagem = atualizarTopicoRequest.mensagem,
-        )
+        val topicoAtualizado = topicoRepository.save(topico)
 
-        topicos[index] = topicoAtualizado
-
-
-        return topicoAtualizado.toResponse()
+       return topicoAtualizado.toResponse()
     }
 
-
+        @Transactional
     fun deletarTopico(id: Long){
-        val removeu = topicos.removeIf { t -> t.id == id }
 
-        if (!removeu){
+        if (!topicoRepository.existsById(id)){
             throw NotFoundException("Topico de id $id não existe!")
         }
-
+        topicoRepository.deleteById(id)
     }
 
 
