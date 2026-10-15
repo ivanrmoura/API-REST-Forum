@@ -9,6 +9,8 @@ import br.com.forum.forumapi.exception.NotFoundException
 import br.com.forum.forumapi.model.Topico
 import br.com.forum.forumapi.repositories.TopicoRepository
 import jakarta.transaction.Transactional
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 
 @Service
@@ -18,8 +20,17 @@ class TopicoService(
     private val topicoRepository: TopicoRepository
 ) {
 
-    fun listar(): List<TopicoResponse>{
-        val topicos = topicoRepository.findAll()
+    fun listar(
+        nomeCurso: String?,
+        paginacao: Pageable
+    ): Page<TopicoResponse>{
+        print("Buscando tópicos no banco de dados .....")
+        val topicos = if (nomeCurso == null ) {
+            topicoRepository.findAll(paginacao)
+        }else{
+            topicoRepository.findTopicoByCursoNameSQL(nomeCurso, paginacao)
+        }
+
         return topicos.map{ it.toResponse() }
     }
 

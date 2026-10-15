@@ -10,13 +10,13 @@ import jakarta.validation.constraints.Size
 data class CriarTopicoRequest (
     @NotEmpty
     @Size(min = 5, max = 100)
-    val titulo: String,
+    var titulo: String,
     @NotEmpty
-    val mensagem: String,
+    var mensagem: String,
     @NotNull
-    val curso: Long,
+    var curso: Long,
     @NotNull
-    val autor: Long
+    var autor: Long
 )
 
 fun CriarTopicoRequest.toTopico(
